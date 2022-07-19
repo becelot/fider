@@ -77,11 +77,17 @@ func UserSettings() web.HandlerFunc {
 			return err
 		}
 
+		forceSynced := &query.IsUserForceSynced{}
+		if err := bus.Dispatch(c, forceSynced); err != nil {
+			return err
+		}
+
 		return c.Page(http.StatusOK, web.Props{
 			Page:  "MySettings/MySettings.page",
 			Title: "Settings",
 			Data: web.Map{
 				"userSettings": settings.Result,
+				"forceSynced":  forceSynced.Result,
 			},
 		})
 	}

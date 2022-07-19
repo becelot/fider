@@ -50,3 +50,9 @@ type UpdateCurrentUser struct {
 	AvatarType enum.AvatarType
 	Avatar     *dto.ImageUpload
 }
+
+type ResyncUser struct {
+	UserID int
+	Email  string
+	Name   string
+}

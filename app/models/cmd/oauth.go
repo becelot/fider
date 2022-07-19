@@ -17,6 +17,7 @@ type SaveCustomOAuthConfig struct {
 	Scope             string
 	ProfileURL        string
 	IsTrusted         bool
+	ForceSync         bool
 	JSONUserIDPath    string
 	JSONUserNamePath  string
 	JSONUserEmailPath string

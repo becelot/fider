@@ -138,6 +138,19 @@ func OAuthToken() web.HandlerFunc {
 			}
 		}
 
+		if user.Name != oauthUser.Result.Name || user.Email != oauthUser.Result.Email {
+			if err := bus.Dispatch(c, &cmd.ResyncUser{
+				UserID: user.ID,
+				Name:   oauthUser.Result.Name,
+				Email:  oauthUser.Result.Email,
+			}); err != nil {
+				return c.Failure(err)
+			}
+
+			user.Name = oauthUser.Result.Name
+			user.Email = oauthUser.Result.Email
+		}
+
 		webutil.AddAuthUserCookie(c, user)
 
 		return c.Redirect(redirectURL.String())
@@ -151,6 +164,15 @@ func isTrustedOAuthProvider(ctx context.Context, provider string) bool {
 		return false
 	}
 	return customOAuthConfigByProvider.Result.IsTrusted
+}
+
+func isForceSyncOAuthProvider(ctx context.Context, provider string) bool {
+	customOAuthConfigByProvider := &query.GetCustomOAuthConfigByProvider{Provider: provider}
+	err := bus.Dispatch(ctx, customOAuthConfigByProvider)
+	if err != nil {
+		return false
+	}
+	return customOAuthConfigByProvider.Result.ForceSync
 }
 
 // OAuthCallback handles the redirect back from the OAuth provider

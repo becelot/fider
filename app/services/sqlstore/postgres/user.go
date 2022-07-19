@@ -402,3 +402,45 @@ func queryUser(ctx context.Context, trx *dbx.Trx, filter string, args ...any) (*
 
 	return user.toModel(ctx), nil
 }
+
+func resyncUser(ctx context.Context, c *cmd.ResyncUser) error {
+	return using(ctx, func(trx *dbx.Trx, tenant *entity.Tenant, user *entity.User) error {
+
+		query := `
+		UPDATE users SET email = $3, name = $4
+	  WHERE tenant_id = $1 AND id = $2`
+
+		_, err := trx.Execute(query, tenant.ID, c.UserID, c.Email, c.Name)
+
+		if err != nil {
+			return errors.Wrap(err, "failed to sync user")
+		}
+
+		return nil
+	})
+}
+
+func isUserForceSynced(ctx context.Context, c *query.IsUserForceSynced) error {
+	return using(ctx, func(trx *dbx.Trx, tenant *entity.Tenant, user *entity.User) error {
+		var forceSync *bool
+		if err := trx.Scalar(&forceSync, `
+		SELECT BOOL_OR(op.force_sync)
+		FROM   users u
+					 JOIN user_providers up
+						 ON up.user_id = u.id and up.tenant_id = u.tenant_id
+					 JOIN oauth_providers op
+						 ON up.provider = op.provider
+		WHERE  u.tenant_id = $1 and u.id = $2
+		`, tenant.ID, user.ID); err != nil {
+			return errors.Wrap(err, "failed to get sync status")
+		}
+
+		if forceSync == nil {
+			c.Result = false
+		} else {
+			c.Result = *forceSync
+		}
+
+		return nil
+	})
+}

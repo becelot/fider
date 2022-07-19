@@ -44,3 +44,7 @@ type GetUserByProvider struct {
 type GetAllUsers struct {
 	Result []*entity.User
 }
+
+type IsUserForceSynced struct {
+	Result bool
+}

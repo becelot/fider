@@ -98,6 +98,8 @@ func (s Service) Init() {
 	bus.AddHandler(getUserByID)
 	bus.AddHandler(getUserByProvider)
 	bus.AddHandler(getAllUsers)
+	bus.AddHandler(resyncUser)
+	bus.AddHandler(isUserForceSynced)
 
 	bus.AddHandler(createTenant)
 	bus.AddHandler(getFirstTenant)

@@ -30,6 +30,7 @@ type CreateEditOAuthConfig struct {
 	Scope             string           `json:"scope"`
 	ProfileURL        string           `json:"profileURL"`
 	IsTrusted         bool             `json:"isTrusted"`
+	ForceSync         bool             `json:"forceSync"`
 	JSONUserIDPath    string           `json:"jsonUserIDPath"`
 	JSONUserNamePath  string           `json:"jsonUserNamePath"`
 	JSONUserEmailPath string           `json:"jsonUserEmailPath"`

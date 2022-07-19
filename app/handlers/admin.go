@@ -194,6 +194,7 @@ func SaveOAuthConfig() web.HandlerFunc {
 				Scope:             action.Scope,
 				ProfileURL:        action.ProfileURL,
 				IsTrusted:         action.IsTrusted,
+				ForceSync:         action.ForceSync,
 				JSONUserIDPath:    action.JSONUserIDPath,
 				JSONUserNamePath:  action.JSONUserNamePath,
 				JSONUserEmailPath: action.JSONUserEmailPath,

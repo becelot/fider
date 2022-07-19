@@ -17,6 +17,7 @@ export const OAuthForm: React.FC<OAuthFormProps> = (props) => {
   const [displayName, setDisplayName] = useState((props.config && props.config.displayName) || "")
   const [enabled, setEnabled] = useState((props.config && props.config.status === OAuthConfigStatus.Enabled) || false)
   const [isTrusted, setTrusted] = useState((props.config && props.config.isTrusted) || false)
+  const [forceSync, setForceSync] = useState((props.config && props.config.forceSync) || false)
   const [clientID, setClientID] = useState((props.config && props.config.clientID) || "")
   const [clientSecret, setClientSecret] = useState((props.config && props.config.clientSecret) || "")
   const [clientSecretEnabled, setClientSecretEnabled] = useState(!props.config)
@@ -48,6 +49,7 @@ export const OAuthForm: React.FC<OAuthFormProps> = (props) => {
       jsonUserNamePath,
       jsonUserEmailPath,
       logo,
+      forceSync,
     })
     if (result.ok) {
       location.reload()
@@ -217,6 +219,15 @@ export const OAuthForm: React.FC<OAuthFormProps> = (props) => {
           <p className="text-muted">
             If enabled, users authenticated by this provider can get access to this site without being invited. This is recommended for corporate access, such
             as Okta, Microsoft AD, Google Workspace and others. Do not use this for public identity providers such as Facebook or Twitter.
+          </p>
+        </Field>
+
+        <Field label="Force Sync">
+          <Toggle field="forceSync" active={forceSync} onToggle={setForceSync} label={forceSync ? "Yes" : "No"} />
+          <p className="text-muted mt-1">This setting synchronizes local users with an external identity provider on every user login.</p>
+          <p className="text-muted">
+            If enabled, users also loose the ability to change their name. Recommended for corporate access to reflect name changes of users from the identity
+            provider, and prevent users to maliciously change their name.
           </p>
         </Field>
 

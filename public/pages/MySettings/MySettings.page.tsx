@@ -18,10 +18,12 @@ interface MySettingsPageState {
   changingEmail: boolean
   error?: Failure
   userSettings: UserSettings
+  forceSynced: boolean
 }
 
 interface MySettingsPageProps {
   userSettings: UserSettings
+  forceSynced: boolean
 }
 
 export default class MySettingsPage extends React.Component<MySettingsPageProps, MySettingsPageState> {
@@ -30,6 +32,7 @@ export default class MySettingsPage extends React.Component<MySettingsPageProps,
     this.state = {
       showModal: false,
       changingEmail: false,
+      forceSynced: this.props.forceSynced,
       avatarType: Fider.session.user.avatarType,
       newEmail: "",
       name: Fider.session.user.name,
@@ -103,7 +106,9 @@ export default class MySettingsPage extends React.Component<MySettingsPageProps,
   }
 
   public render() {
-    const changeEmail = (
+    const changeEmail = this.state.forceSynced ? (
+      <></>
+    ) : (
       <Button variant="tertiary" size="small" onClick={this.startChangeEmail}>
         <Trans id="action.change">change</Trans>
       </Button>
@@ -168,7 +173,14 @@ export default class MySettingsPage extends React.Component<MySettingsPageProps,
                 )}
               </Input>
 
-              <Input label={t({ id: "label.name", message: "Name" })} field="name" value={this.state.name} maxLength={100} onChange={this.setName} />
+              <Input
+                label={t({ id: "label.name", message: "Name" })}
+                field="name"
+                value={this.state.name}
+                maxLength={100}
+                onChange={this.setName}
+                disabled={this.state.forceSynced}
+              />
 
               <Select
                 label={t({ id: "label.avatar", message: "Avatar" })}

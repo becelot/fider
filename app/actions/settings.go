@@ -6,6 +6,8 @@ import (
 	"github.com/getfider/fider/app/models/dto"
 	"github.com/getfider/fider/app/models/entity"
 	"github.com/getfider/fider/app/models/enum"
+	"github.com/getfider/fider/app/models/query"
+	"github.com/getfider/fider/app/pkg/bus"
 	"github.com/getfider/fider/app/pkg/i18n"
 	"github.com/getfider/fider/app/pkg/validate"
 )
@@ -26,7 +28,16 @@ func NewUpdateUserSettings() *UpdateUserSettings {
 
 // IsAuthorized returns true if current user is authorized to perform this action
 func (action *UpdateUserSettings) IsAuthorized(ctx context.Context, user *entity.User) bool {
-	return user != nil
+	if user == nil {
+		return false
+	}
+
+	isForceSynced := &query.IsUserForceSynced{}
+	if err := bus.Dispatch(ctx, isForceSynced); err != nil {
+		return false
+	}
+
+	return !isForceSynced.Result
 }
 
 // Validate if current model is valid

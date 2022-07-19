@@ -1,0 +1,1 @@
+ALTER TABLE oauth_providers ADD force_sync BOOLEAN NOT NULL DEFAULT(false);

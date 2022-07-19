@@ -107,7 +107,16 @@ func NewChangeUserEmail() *ChangeUserEmail {
 
 // IsAuthorized returns true if current user is authorized to perform this action
 func (action *ChangeUserEmail) IsAuthorized(ctx context.Context, user *entity.User) bool {
-	return user != nil
+	if user == nil {
+		return false
+	}
+
+	isForceSynced := &query.IsUserForceSynced{}
+	if err := bus.Dispatch(ctx, isForceSynced); err != nil {
+		return false
+	}
+
+	return !isForceSynced.Result
 }
 
 // Validate if current model is valid

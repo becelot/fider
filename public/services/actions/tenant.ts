@@ -1,5 +1,5 @@
 import { http, Result } from "@fider/services/http"
-import { UserRole, OAuthConfig, ImageUpload, EmailVerificationKind } from "@fider/models"
+import { EmailVerificationKind, ImageUpload, OAuthConfig, UserRole } from "@fider/models"
 
 export interface CheckAvailabilityResponse {
   message: string
@@ -102,6 +102,7 @@ export interface CreateEditOAuthConfigRequest {
   jsonUserEmailPath: string
   logo?: ImageUpload
   isTrusted: boolean
+  forceSync: boolean
 }
 
 export const saveOAuthConfig = async (request: CreateEditOAuthConfigRequest): Promise<Result> => {

@@ -19,6 +19,7 @@ type dbOAuthConfig struct {
 	LogoBlobKey       string `db:"logo_bkey"`
 	Status            int    `db:"status"`
 	IsTrusted         bool   `db:"is_trusted"`
+	ForceSync         bool   `db:"force_sync"`
 	ClientID          string `db:"client_id"`
 	ClientSecret      string `db:"client_secret"`
 	AuthorizeURL      string `db:"authorize_url"`
@@ -37,6 +38,7 @@ func (m *dbOAuthConfig) toModel() *entity.OAuthConfig {
 		DisplayName:       m.DisplayName,
 		Status:            m.Status,
 		IsTrusted:         m.IsTrusted,
+		ForceSync:         m.ForceSync,
 		LogoBlobKey:       m.LogoBlobKey,
 		ClientID:          m.ClientID,
 		ClientSecret:      m.ClientSecret,
@@ -59,7 +61,7 @@ func getCustomOAuthConfigByProvider(ctx context.Context, q *query.GetCustomOAuth
 		config := &dbOAuthConfig{}
 		err := trx.Get(config, `
 		SELECT id, provider, display_name, status, is_trusted, logo_bkey,
-					 client_id, client_secret, authorize_url,
+					 client_id, client_secret, authorize_url, force_sync,
 					 profile_url, token_url, scope, json_user_id_path,
 					 json_user_name_path, json_user_email_path
 		FROM oauth_providers
@@ -84,7 +86,7 @@ func listCustomOAuthConfig(ctx context.Context, q *query.ListCustomOAuthConfig) 
 		if tenant != nil {
 			err := trx.Select(&configs, `
 			SELECT id, provider, display_name, status, is_trusted, logo_bkey,
-						 client_id, client_secret, authorize_url,
+						 client_id, client_secret, authorize_url, force_sync,
 						 profile_url, token_url, scope, json_user_id_path,
 						 json_user_name_path, json_user_email_path
 			FROM oauth_providers
@@ -113,7 +115,7 @@ func saveCustomOAuthConfig(ctx context.Context, c *cmd.SaveCustomOAuthConfig) er
 
 		if c.ID == 0 {
 			query := `INSERT INTO oauth_providers (
-				tenant_id, provider, display_name, status, is_trusted,
+				tenant_id, provider, display_name, status, is_trusted, force_sync,
 				client_id, client_secret, authorize_url,
 				profile_url, token_url, scope, json_user_id_path,
 				json_user_name_path, json_user_email_path, logo_bkey
@@ -121,8 +123,8 @@ func saveCustomOAuthConfig(ctx context.Context, c *cmd.SaveCustomOAuthConfig) er
 			RETURNING id`
 
 			err = trx.Get(&c.ID, query, tenant.ID, c.Provider,
-				c.DisplayName, c.Status, c.IsTrusted, c.ClientID, c.ClientSecret,
-				c.AuthorizeURL, c.ProfileURL, c.TokenURL,
+				c.DisplayName, c.Status, c.IsTrusted, c.ForceSync, c.ClientID,
+				c.ClientSecret, c.AuthorizeURL, c.ProfileURL, c.TokenURL,
 				c.Scope, c.JSONUserIDPath, c.JSONUserNamePath,
 				c.JSONUserEmailPath, c.Logo.BlobKey)
 		} else {
@@ -131,14 +133,14 @@ func saveCustomOAuthConfig(ctx context.Context, c *cmd.SaveCustomOAuthConfig) er
 				SET display_name = $3, status = $4, client_id = $5, client_secret = $6, 
 						authorize_url = $7, profile_url = $8, token_url = $9, scope = $10, 
 						json_user_id_path = $11, json_user_name_path = $12, json_user_email_path = $13,
-						logo_bkey = $14, is_trusted = $15
+						logo_bkey = $14, is_trusted = $15, force_sync = $16
 			WHERE tenant_id = $1 AND id = $2`
 
 			_, err = trx.Execute(query, tenant.ID, c.ID,
 				c.DisplayName, c.Status, c.ClientID, c.ClientSecret,
 				c.AuthorizeURL, c.ProfileURL, c.TokenURL,
 				c.Scope, c.JSONUserIDPath, c.JSONUserNamePath,
-				c.JSONUserEmailPath, c.Logo.BlobKey, c.IsTrusted)
+				c.JSONUserEmailPath, c.Logo.BlobKey, c.IsTrusted, c.ForceSync)
 		}
 
 		if err != nil {
